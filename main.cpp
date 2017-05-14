@@ -16,6 +16,7 @@
 /* returns packet id */
 volatile char * condi;
 volatile char * D_A;
+
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
     uint8_t url[20]{0};  //fix size
@@ -67,30 +68,33 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     ret = nfq_get_payload(tb, &data);
     if (ret >= 0)
     {
-            struct ether_header *ep;
-            ep = (struct ether_header*)data;
-            if(ep->ether_type == ETHERTYPE_IP)
-            {
-                data += sizeof(struct ether_header);
+                printf("첫번째 통과!!``````````````` \n");
                 struct iphdr *ipp;
-                ipp = (struct  iphdr *)data;
+                ipp=(struct iphdr*)data;
+
                 if(ipp->protocol == IPPROTO_TCP)
                 {
+                    printf("두번째 통과!!```````````````\n");
                     data += sizeof(struct iphdr);
                     struct tcphdr *tp;
                     tp = (struct tcphdr *)data;
-
                     // tcp data
                     for(; ret>0; ret--)
                     {
+                        printf("세번째 통과!!------------");
                         uint32_t *host_start = (uint32_t *)tp;
                         if(*host_start == ntohl(0x486f7374))
                         {
                             printf("Host start !!\n");
+                            if(memcmp(url,(uint8_t *)data,20)==0)
+                            {
+                                 printf("Drop The Ip!! \n");
+                            }
+
                         }
                     }
                 }
-           }
+          // }
            printf("payload_len=%d ", ret);
            fputc('\n', stdout);
     }
@@ -164,7 +168,7 @@ int main(int argc, char *argv[])
 
     for (;;) {
         if ((rv = recv(fd, buf, sizeof(buf), 0)) >= 0) {
-            printf("pkt received\n");
+            printf("pkt received \n");
             nfq_handle_packet(h, buf, rv); //패킷받는곳
             continue;
         }
