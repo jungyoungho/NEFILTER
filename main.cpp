@@ -14,8 +14,8 @@
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
 /* returns packet id */
-volatile char * condi;
-volatile char * D_A;
+char * condi;
+char * D_A;
 
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
@@ -81,8 +81,8 @@ static u_int32_t print_pkt (struct nfq_data *tb)
                     // tcp data
                     for(; ret>0; ret--)
                     {
-                        printf("세번째 통과!!------------");
-                        uint32_t *host_start = (uint32_t *)tp;
+                        printf("세번째 통과!!-----------\n");
+                        uint32_t *host_start = (uint32_t *)data;
                         if(*host_start == ntohl(0x486f7374))
                         {
                             printf("Host start !!\n");
