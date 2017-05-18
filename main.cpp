@@ -12,6 +12,7 @@
 #include <linux/netfilter.h>        /* for NF_ACCEPT */
 #include <errno.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
+#include <regex.h>
 
 /* returns packet id */
 char * condi;
@@ -19,9 +20,10 @@ char * D_A;
 
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
+    /*
     uint8_t url[20]{0};  //fix size
     memcpy(url,(const char*)condi,20);
-
+    */
     int id = 0;
     struct nfqnl_msg_packet_hdr *ph;
     struct nfqnl_msg_packet_hw *hwph;
@@ -76,22 +78,28 @@ static u_int32_t print_pkt (struct nfq_data *tb)
                 {
                     printf("두번째 통과!!```````````````\n");
                     data += sizeof(struct iphdr);
-                    struct tcphdr *tp;
-                    tp = (struct tcphdr *)data;
-                    // tcp data
+                    data += sizeof(struct tcphdr);
+
                     for(; ret>0; ret--)
                     {
                         printf("세번째 통과!!-----------\n");
                         uint32_t *host_start = (uint32_t *)data;
                         if(*host_start == ntohl(0x486f7374))
                         {
-                            printf("Host start !!\n");
-                            if(memcmp(url,(uint8_t *)data,20)==0)
+                            for(; ret>0; ret--)
                             {
-                                 printf("Drop The Ip!! \n");
-                            }
+                                printf("%c",*data);
+                                if(memcmp(data,(u_char*)condi,20)==0) //fix
+                                {
+                                     printf("Drop The Ip!! \n");
+                                     break;
+                                }
 
+                                data++;
+                            }
                         }
+                        else
+                            data++;
                     }
                 }
           // }
