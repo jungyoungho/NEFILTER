@@ -13,10 +13,15 @@
 #include <errno.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
 #include <regex.h>
+#include <iostream>
 
 /* returns packet id */
+using namespace std;
+
 char * condi;
 char * D_A;
+char * hostdata;
+uint8_t *tcpdata;
 
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
@@ -27,7 +32,6 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     int id = 0;
     struct nfqnl_msg_packet_hdr *ph;
     struct nfqnl_msg_packet_hw *hwph;
-
     u_int32_t mark,ifi;
     int ret;
     u_char *data;
@@ -82,27 +86,28 @@ static u_int32_t print_pkt (struct nfq_data *tb)
 
                     for(; ret>0; ret--)
                     {
-                        printf("세번째 통과!!-----------\n");
                         uint32_t *host_start = (uint32_t *)data;
                         if(*host_start == ntohl(0x486f7374))
                         {
+
                             for(; ret>0; ret--)
                             {
-                                printf("%c",*data);
-                                if(memcmp(data,(u_char*)condi,20)==0) //fix
-                                {
-                                     printf("Drop The Ip!! \n");
-                                     break;
-                                }
+                                uint16_t *host_fin = (uint16_t *)data;
+                                printf("%c", *data);
 
                                 data++;
+                                if(*host_fin == ntohs(0x0d0a))
+                                {
+                                    printf("\n");
+                                    break;
+                                }
                             }
                         }
                         else
                             data++;
                     }
                 }
-          // }
+                //printf("AAAAAAAAAAAAAAAAAAAAAAAA%s \n",box);
            printf("payload_len=%d ", ret);
            fputc('\n', stdout);
     }
