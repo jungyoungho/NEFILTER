@@ -19,9 +19,8 @@
 using namespace std;
 
 char * condi;
-char * D_A;
 char * hostdata;
-uint8_t *tcpdata;
+int drop_mess;
 
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
@@ -71,39 +70,32 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     ret = nfq_get_payload(tb, &data);
     if (ret >= 0)
     {
-                printf("첫번째 통과!!``````````````` \n");
                 struct iphdr *ipp;
                 ipp=(struct iphdr*)data;
 
                 if(ipp->protocol == IPPROTO_TCP)
                 {
-                    printf("두번째 통과!!```````````````\n");
                     data += sizeof(struct iphdr);
                     data += sizeof(struct tcphdr);
-
                     for(; ret>0; ret--)
                     {
                         uint32_t *host_start = (uint32_t *)data;
                         if(*host_start == ntohl(0x486f7374))
                         {
                            if(strncmp(condi,(char*)data+6,10)==0)
-                                printf("22222222222222222222222222222\n");
-                            /*
-                            for(; ret>0; ret--)
-                            {
-                                uint16_t *host_fin = (uint16_t *)data;
-                                printf("%c", *data);
+                           {
+                                drop_mess=1;
+                                printf(">> This URL is Drop!!\n");
+                                break;
+                           }
+                           else
+                           {
+                               drop_mess=0;
+                               break;
+                           }
 
-                                data++;
-                                if(*host_fin == ntohs(0x0d0a))
-                                {
-                                    printf("\n");
-                                    break;
-                                }
-                            }
-                            */
+
                         }
-
                         else
                             data++;
                     }
@@ -118,23 +110,22 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *
 {
     u_int32_t id = print_pkt(nfa);
     printf("Entering callback\n");
-    uint32_t *Drop_or_Acpt = (uint32_t*)D_A;
 
-    if(*Drop_or_Acpt==ntohl(0x64726f70))
-            return nfq_set_verdict(qh, id, NF_DROP, 0, NULL);
-    else if(*Drop_or_Acpt==ntohl(0x61637074))
+    if(drop_mess ==1)
+        return nfq_set_verdict(qh, id, NF_DROP, 0, NULL);
+
+    else if(drop_mess==0)
             return nfq_set_verdict(qh, id, NF_ACCEPT, 0, NULL);
 }
 
 int main(int argc, char *argv[])
 {
-    if(argc!=3)
+    if(argc!=2)
     {
-        printf(" 사용법 : <Write URL> <drop or acpt> \n");
+        printf(" 사용법 : <Write URL>\n");
         return 0;
     }
     condi = argv[1];
-    D_A = argv[2];
     struct nfq_handle *h;
     struct nfq_q_handle *qh;
     struct nfnl_handle *nh;
