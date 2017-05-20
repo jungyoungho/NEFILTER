@@ -82,7 +82,9 @@ static u_int32_t print_pkt (struct nfq_data *tb)
                         uint32_t *host_start = (uint32_t *)data;
                         if(*host_start == ntohl(0x486f7374))
                         {
-                           if(strncmp(condi,(char*)data+6,10)==0)
+
+                           int len = strlen(condi);
+                           if(strncmp(condi,(char*)data+6,len)==0)
                            {
                                 drop_mess=1;
                                 printf(">> This URL is Drop!!\n");
