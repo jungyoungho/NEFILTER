@@ -12,7 +12,6 @@
 #include <linux/netfilter.h>        /* for NF_ACCEPT */
 #include <errno.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
-#include <regex.h>
 #include <iostream>
 
 /* returns packet id */
