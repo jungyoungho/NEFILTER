@@ -15,7 +15,6 @@
 #include <iostream>
 
 /* returns packet id */
-using namespace std;
 
 char * condi;
 char * hostdata;
