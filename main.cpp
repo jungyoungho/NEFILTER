@@ -82,7 +82,7 @@ static u_int32_t print_pkt (struct nfq_data *tb)
                         {
 
                            int len = strlen(condi);
-                           if(strncmp(condi,(char*)data+6,len)==0)
+                           if(memcmp(condi,(char*)data+6,len)==0) // or strncmp
                            {
                                 drop_mess=1;
                                 printf(">> This URL is Drop!!\n");
