@@ -17,7 +17,6 @@
 /* returns packet id */
 
 char * condi;
-char * hostdata;
 int drop_mess;
 
 static u_int32_t print_pkt (struct nfq_data *tb)
